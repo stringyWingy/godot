@@ -396,6 +396,24 @@ Size2i TileSet::get_tile_size() const {
 	return tile_size;
 }
 
+void TileSet::set_basis_x(Vector2i p_basis_x){
+	basis_x = p_basis_x;
+	//TODO: auto set tile size
+	emit_changed();
+}
+Vector2i TileSet::get_basis_x(){
+	return basis_x;
+}
+
+void TileSet::set_basis_y(Vector2i p_basis_y){
+	basis_y = p_basis_y;
+	//TODO: auto set tile size
+	emit_changed();
+}
+Vector2i TileSet::get_basis_y(){
+	return basis_y;
+}
+
 int TileSet::get_next_source_id() const {
 	return next_source_id;
 }
@@ -4264,9 +4282,15 @@ void TileSet::_get_property_list(List<PropertyInfo> *p_list) const {
 }
 
 void TileSet::_validate_property(PropertyInfo &p_property) const {
-	if (p_property.name == "tile_layout" && tile_shape == TILE_SHAPE_SQUARE) {
+	if (p_property.name == "tile_layout" &&
+		(tile_shape == TILE_SHAPE_SQUARE || tile_shape == TILE_SHAPE_CUSTOM_BASIS)) {
 		p_property.usage ^= PROPERTY_USAGE_READ_ONLY;
-	} else if (p_property.name == "tile_offset_axis" && tile_shape == TILE_SHAPE_SQUARE) {
+	} else if (p_property.name == "tile_offset_axis" &&
+		(tile_shape == TILE_SHAPE_SQUARE || tile_shape == TILE_SHAPE_CUSTOM_BASIS)) {
+		p_property.usage ^= PROPERTY_USAGE_READ_ONLY;
+	} else if (p_property.name == "tile_size" && tile_shape == TILE_SHAPE_CUSTOM_BASIS){
+		p_property.usage ^= PROPERTY_USAGE_READ_ONLY;
+	} else if ((p_property.name == "basis_x" || p_property.name == "basis_y") && tile_shape != TILE_SHAPE_CUSTOM_BASIS){
 		p_property.usage ^= PROPERTY_USAGE_READ_ONLY;
 	}
 }
@@ -4292,10 +4316,17 @@ void TileSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_tile_size", "size"), &TileSet::set_tile_size);
 	ClassDB::bind_method(D_METHOD("get_tile_size"), &TileSet::get_tile_size);
 
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "tile_shape", PROPERTY_HINT_ENUM, "Square,Isometric,Half-Offset Square,Hexagon"), "set_tile_shape", "get_tile_shape");
+	ClassDB::bind_method(D_METHOD("set_basis_x"), &TileSet::set_basis_x);
+	ClassDB::bind_method(D_METHOD("get_basis_x"), &TileSet::get_basis_x);
+	ClassDB::bind_method(D_METHOD("set_basis_y"), &TileSet::set_basis_y);
+	ClassDB::bind_method(D_METHOD("get_basis_y"), &TileSet::get_basis_y);
+
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "tile_shape", PROPERTY_HINT_ENUM, "Square,Isometric,Half-Offset Square,Hexagon,Custom Basis"), "set_tile_shape", "get_tile_shape");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "tile_layout", PROPERTY_HINT_ENUM, "Stacked,Stacked Offset,Stairs Right,Stairs Down,Diamond Right,Diamond Down"), "set_tile_layout", "get_tile_layout");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "tile_offset_axis", PROPERTY_HINT_ENUM, "Horizontal Offset,Vertical Offset"), "set_tile_offset_axis", "get_tile_offset_axis");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "tile_size", PROPERTY_HINT_NONE, "suffix:px"), "set_tile_size", "get_tile_size");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "basis_x", PROPERTY_HINT_NONE, "suffix:px"), "set_basis_x", "get_basis_x");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "basis_y", PROPERTY_HINT_NONE, "suffix:px"), "set_basis_y", "get_basis_y");
 
 	// Rendering.
 	ClassDB::bind_method(D_METHOD("set_uv_clipping", "uv_clipping"), &TileSet::set_uv_clipping);
@@ -4405,6 +4436,7 @@ void TileSet::_bind_methods() {
 	BIND_ENUM_CONSTANT(TILE_SHAPE_ISOMETRIC);
 	BIND_ENUM_CONSTANT(TILE_SHAPE_HALF_OFFSET_SQUARE);
 	BIND_ENUM_CONSTANT(TILE_SHAPE_HEXAGON);
+	BIND_ENUM_CONSTANT(TILE_SHAPE_CUSTOM_BASIS);
 
 	BIND_ENUM_CONSTANT(TILE_LAYOUT_STACKED);
 	BIND_ENUM_CONSTANT(TILE_LAYOUT_STACKED_OFFSET);

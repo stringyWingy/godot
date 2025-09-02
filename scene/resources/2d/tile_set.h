@@ -241,6 +241,7 @@ public:
 		TILE_SHAPE_ISOMETRIC,
 		TILE_SHAPE_HALF_OFFSET_SQUARE,
 		TILE_SHAPE_HEXAGON,
+		TILE_SHAPE_CUSTOM_BASIS,
 	};
 
 	enum TileLayout {
@@ -310,6 +311,8 @@ private:
 	TileLayout tile_layout = TILE_LAYOUT_STACKED;
 	TileOffsetAxis tile_offset_axis = TILE_OFFSET_AXIS_HORIZONTAL;
 	Size2i tile_size = Size2i(16, 16); //Size2(64, 64);
+	Vector2i basis_x = Vector2i(16,0);
+	Vector2i basis_y = Vector2i(0,16);
 
 	// Rendering.
 	bool uv_clipping = false;
@@ -415,6 +418,10 @@ public:
 	TileOffsetAxis get_tile_offset_axis() const;
 	void set_tile_size(Size2i p_size);
 	Size2i get_tile_size() const;
+	void set_basis_x(Vector2i p_basis_x);
+	Vector2i get_basis_x();
+	void set_basis_y(Vector2i p_basis_y);
+	Vector2i get_basis_y();
 
 	// -- Sources management --
 	int get_next_source_id() const;
