@@ -398,7 +398,8 @@ Size2i TileSet::get_tile_size() const {
 
 void TileSet::set_basis_x(Vector2i p_basis_x){
 	basis_x = p_basis_x;
-	//TODO: auto set tile size
+	Rect2i rect = get_basis_rect();
+	set_tile_size(rect.size);
 	emit_changed();
 }
 Vector2i TileSet::get_basis_x(){
@@ -407,7 +408,8 @@ Vector2i TileSet::get_basis_x(){
 
 void TileSet::set_basis_y(Vector2i p_basis_y){
 	basis_y = p_basis_y;
-	//TODO: auto set tile size
+	Rect2i rect = get_basis_rect();
+	set_tile_size(rect.size);
 	emit_changed();
 }
 Vector2i TileSet::get_basis_y(){
@@ -1510,6 +1512,29 @@ TileMapCell TileSet::get_random_tile_from_terrains_pattern(int p_terrain_set, Ti
 	ERR_FAIL_V(TileMapCell());
 }
 
+Rect2i TileSet::get_basis_rect() const{
+	Rect2i ret;
+	Vector2i minv(0,0), maxv(0,0);
+	Vector<Vector2i> basis_corners;
+
+	basis_corners.push_back(Vector2i(0, 0));
+	basis_corners.push_back(basis_x);
+	basis_corners.push_back(basis_x + basis_y);
+	basis_corners.push_back(basis_y);
+
+	for (int i = 1; i < basis_corners.size(); i++){
+		minv.x = std::min(basis_corners[i].x, minv.x);
+		minv.y = std::min(basis_corners[i].y, minv.y);
+
+		maxv.x = std::max(basis_corners[i].x, maxv.x);
+		maxv.y = std::max(basis_corners[i].y, maxv.y);
+	}
+
+	ret.position = minv;
+	ret.size = maxv - minv;
+	return ret;
+}
+
 Vector<Vector2> TileSet::get_tile_shape_polygon() const {
 	Vector<Vector2> points;
 	if (tile_shape == TileSet::TILE_SHAPE_SQUARE) {
@@ -1522,6 +1547,14 @@ Vector<Vector2> TileSet::get_tile_shape_polygon() const {
 		points.push_back(Vector2(-0.5, 0.0));
 		points.push_back(Vector2(0.0, 0.5));
 		points.push_back(Vector2(0.5, 0.0));
+	} else if (tile_shape == TileSet::TILE_SHAPE_CUSTOM_BASIS) {
+		Rect2i rect = get_basis_rect();
+		Vector2 center = Vector2(rect.position) + Vector2(rect.size) * 0.5;
+
+		points.push_back((Vector2(0.0, 0.0) - center) / Vector2(rect.size));
+		points.push_back((Vector2(basis_x) - center) / Vector2(rect.size));
+		points.push_back((Vector2(basis_x + basis_y) - center) / Vector2(rect.size));
+		points.push_back((Vector2(basis_y) - center) / Vector2(rect.size));
 	} else {
 		float overlap = 0.0;
 		switch (tile_shape) {
