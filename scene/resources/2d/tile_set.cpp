@@ -4290,8 +4290,10 @@ void TileSet::_validate_property(PropertyInfo &p_property) const {
 		p_property.usage ^= PROPERTY_USAGE_READ_ONLY;
 	} else if (p_property.name == "tile_size" && tile_shape == TILE_SHAPE_CUSTOM_BASIS){
 		p_property.usage ^= PROPERTY_USAGE_READ_ONLY;
-	} else if ((p_property.name == "basis_x" || p_property.name == "basis_y") && tile_shape != TILE_SHAPE_CUSTOM_BASIS){
-		p_property.usage ^= PROPERTY_USAGE_READ_ONLY;
+	} else if (p_property.name == "basis_x" || p_property.name == "basis_y"){
+		if (tile_shape != TILE_SHAPE_CUSTOM_BASIS){
+			p_property.usage = PROPERTY_USAGE_NO_EDITOR;
+		}
 	}
 }
 
