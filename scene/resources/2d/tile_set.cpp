@@ -1631,7 +1631,7 @@ void TileSet::draw_tile_shape(CanvasItem *p_canvas_item, Transform2D p_transform
 Vector2 TileSet::map_to_local(const Vector2i &p_pos) const {
 	if (tile_shape == TileSet::TILE_SHAPE_CUSTOM_BASIS) {
 		Transform2D xform = Transform2D(basis_x, basis_y, Vector2(0.0,0.0));
-		return xform.basis_xform(Vector2(p_pos) + Vector2(0.5, 0.5));
+		return xform.basis_xform(Vector2(p_pos) + Vector2(0.5, 0.5)).floor();
 	}
 	// SHOULD RETURN THE CENTER OF THE CELL.
 	Vector2 ret = p_pos;
@@ -1709,7 +1709,7 @@ Vector2i TileSet::local_to_map(const Vector2 &p_local_position) const {
 	if (tile_shape == TileSet::TILE_SHAPE_CUSTOM_BASIS) {
 		Transform2D xform = Transform2D(basis_x, basis_y, Vector2(0.0,0.0));
 		Vector2 xformed = xform.affine_inverse().basis_xform(p_local_position);
-		return xformed.floor();
+		return (xformed + Vector2(0.00005, 0.00005)).floor();
 	}
 
 	Vector2 ret = p_local_position;
